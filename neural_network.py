@@ -1,7 +1,5 @@
 import numpy as np
-import os.path
 import pickle
-import matplotlib.pyplot as plt
 
 
 class Linear:
@@ -181,77 +179,4 @@ class NeuralNetwork:
     def load(filename):
         with open(filename, "rb") as i:
             return pickle.load(i)
-
-
-def load_data(identifier):
-    data_file = f"mnist-{identifier}-data"
-    labels_file = f"mnist-{identifier}-labels"
-    if not os.path.exists(f"{data_file}.npy") \
-            or not os.path.exists(f"{labels_file}.npy"):
-        X = np.genfromtxt(f"{data_file}.csv", delimiter=" ", dtype=np.float32) / 255
-        T = np.genfromtxt(f"{labels_file}.csv", delimiter=" ", dtype=np.int8)
-        np.save(data_file, X)
-        np.save(labels_file, T)
-    else:
-        X = np.load(f"{data_file}.npy")
-        T = np.load(f"{labels_file}.npy")
-    return X, T
-
-
-def handcheck_classification(X, T, nn):
-    num_samples, _ = X.shape
-    R = nn.classify(X)
-
-    for i in range(num_samples):
-        x = X[i, :]
-        t = T[i]
-        c = R[i]
-        print(f"Correct: {t}, classified as: {c}")
-        plt.imshow(x.reshape((28, 28)))
-        plt.show()
-
-
-def train_linear_softmax_ce(epochs, batchsize, learning_rate):
-    nn_name = f"l-sm-ce-{epochs}-{batchsize}-{learning_rate}.trained"
-
-    if os.path.exists(nn_name):
-        nn = NeuralNetwork.load(nn_name)
-    else:
-        l1 = Linear(dim_input=28 * 28, num_neurons=10)
-        sm = SoftMax()
-        ce = CrossEntropy()
-        nn = NeuralNetwork([l1, sm], ce)
-
-        X, T = load_data("train")
-        for e in range(epochs):
-            nn.train(X, T, batchsize, learning_rate)
-            loss, acc = nn.evaluate(X, T)
-            print(f"Finshed epoch #{e}. Training loss: {loss}, training acc: {acc}")
-        print("Training done. Evaluating on test set.")
-        X_test, T_test = load_data("test")
-        loss, acc = nn.evaluate(X_test, T_test)
-        print(f"Loss: {loss}, accuracy: {acc}")
-
-        NeuralNetwork.save(nn, nn_name)
-    return nn
-
-if __name__ == "__main__":
-    epochs = 100
-    batchsize = 600
-    learning_rate = 0.1
-
-    nn = train_linear_softmax_ce(epochs, batchsize, learning_rate)
-    X_valid, T_valid = load_data("valid")
-    num_samples, _ = X_valid.shape
-    loss, acc = nn.evaluate(X_valid, T_valid)
-    misclassified = int((1 - acc) * num_samples)
-    print(f"{misclassified} samples were misclassified.")
-
-
-
-
-
-
-
-
 
