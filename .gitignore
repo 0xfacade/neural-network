@@ -1,0 +1,4 @@
+*.trained
+*.npy
+*.csv
+.idea
