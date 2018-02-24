@@ -32,6 +32,23 @@ class Linear:
         self.W -= learning_rate * self.dW
         self.b -= learning_rate * self.db
 
+
+class Tanh:
+
+    def fprop(self, X):
+        Exp = np.exp(X)
+        NegExp = np.exp((-1)*X)
+        self.Z = (Exp - NegExp) / (Exp + NegExp)
+        return self.Z
+
+    def bprop(self, V):
+        R = 1 - np.square(self.Z)
+        return V * R
+
+    def update_params(self, learning_rate):
+        pass
+
+
 class SoftMax:
 
     def fprop(self, X):
